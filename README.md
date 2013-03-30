@@ -1,7 +1,7 @@
 Purdoogle
 =========
 
-A Java servlet search engine and web crawler
+A Java Based Web Crawler and Search Engine
 
 The Database
 ============
