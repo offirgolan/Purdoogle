@@ -494,10 +494,11 @@ public class Crawler implements Runnable
          if (NextURLID < MaxURLs)
          {
             extractDocumentURLs(doc);
-            imgIndexStart = NextImageURLID;
-            extractDocumentImages(doc);
-            imgIndexEnd = NextImageURLID;
          }
+         
+         imgIndexStart = NextImageURLID;
+         extractDocumentImages(doc);
+         imgIndexEnd = NextImageURLID;
  
          // Get document parsed text (no tags)
          System.out.println("Parsing Document...");
