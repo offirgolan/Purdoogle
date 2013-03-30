@@ -165,7 +165,7 @@ The webcrawler program uses <i>breadth-first search</i> and will have the syntax
 
 Where <b>maxurls</b>  is the maximum number of URLs that will be traversed. By default it is 1000. <b>domain</b> is the domain used to restrict the links added to the table of URLs. Only the URLs in this domain will be added. <b>url-list</b> is the list of starting URL's that will be traversed. The <b>-r</b> flag tells the crawler whether to reset the database or to start where it last left off. 
 
-Alternatively, these settings are stored in <b>database.properties</b>
+Alternatively, these settings are stored in <b>database.properties</b>. This is a multi-threaded crawler and the number of threads can be changed by changing the global variable nThread in the crawler class. 
 
 The Properties Manager
 ======================
