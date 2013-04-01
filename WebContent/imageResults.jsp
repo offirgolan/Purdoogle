@@ -80,6 +80,7 @@ $(document).ready(function() {
 
    <div class=results>
       <%
+      // If there are no results found
          if (result != null)
          {
             if (result.size() == 0)
@@ -98,9 +99,10 @@ $(document).ready(function() {
          }
             else
             {
-
+               // Display all images
                for (int i = 0; i < result.size(); i++)
                {
+               // Use lazy load to speed up image scrolling
       %>
       <a class="fancybox lazy" rel="gallery1" href="<%=result.get(i).get(0)%>" title="">
       <img src="<%=result.get(i).get(0)%>" alt="" style="max-height:200px; width:auto; max-width:50%; min-width:auto;">

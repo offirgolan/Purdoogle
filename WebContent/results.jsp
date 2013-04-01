@@ -1,6 +1,7 @@
 <%@ page language="java" pageEncoding="UTF-8" session="true"%>
 <%@ page import="java.util.*"%>
 <%
+   // Create global variables 
    Object query = request.getAttribute("query");
    int pageNum = (Integer) request.getAttribute("pageNum");
    List<ArrayList<String>> result = (List<ArrayList<String>>) request
@@ -74,6 +75,7 @@
 
 	<div class=results>
 		<%
+		   // If no results are found
 		   if (result != null)
 		   {
 		      if (result.size() == 0)
@@ -90,6 +92,7 @@
 		
 		<%
 		   }
+		      // Print only 10 entries from the result list
 		      else
 		      {
 
@@ -97,7 +100,7 @@
 		               && i < result.size(); i++)
 		         {
 		%>
-		<a href="<%=result.get(i).get(0)%>"><%=result.get(i).get(1)%></a>
+		<a href="<%=result.get(i).get(0)%>" style="color:blue;"><%=result.get(i).get(1)%></a>
 		<div class=arrow-right>
 			<a href="<%=result.get(i).get(0)%>" target="_blank" onclick="return false"
 				class="livepreview">&raquo;</a>
@@ -121,13 +124,13 @@
 <div class=pageNumbers>
       <%
          if (maxPages > 1)
-         { // PREVIOUS
+         { // Show "Purd" 
       %>
       <img class=pageNumberImageFront src="../img/page_num_front.png">
       <% } %>
       <%
          if (pageNum > 1)
-         { // PREVIOUS
+         { // show PREVIOUS button if user is not on the first page
       %>
       <form name="pageForm0" method="POST" action="/Purdoogle/web/search" class=Prev>
          <input type="hidden" name="page" value="<%=pageNum - 1%>"> <input
@@ -137,10 +140,11 @@
       </form>
       <%
          } // PAGE NUMBERS
-         if (maxPages > 1)
+         if (maxPages > 1) // If there is more than one page of results
          {
-            if(pageNum <= 5)
+            if(pageNum <= 5) // User is page 5 or less
             {
+               // Show pages 1 to 10
                for (int i = 1; i <= 10 && i <= maxPages; i++)
                {
                    String title;

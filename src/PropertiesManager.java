@@ -64,6 +64,11 @@ public class PropertiesManager
       readProperties();
    }
    
+   /**
+    * Get all the information from the properties file to fill all the UI 
+    * elements
+    * @throws IOException
+    */
    public void readProperties() throws IOException
    {
       props = new Properties();
@@ -84,6 +89,10 @@ public class PropertiesManager
       
    }
    
+   /**
+    * Save the new settings entered in the application to the properties file
+    * @throws IOException
+    */
    public void  setProperties() throws IOException
    {
       props.setProperty("jdbc.url",this.textField_jdbcUrl.getText());
@@ -107,11 +116,13 @@ public class PropertiesManager
     */
    private void initialize()
    {
+      // Frame
       frame = new JFrame();
       frame.setTitle("Purdoogle Properties Manager");
       frame.setBounds(100, 100, 487, 460);
       frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
       
+      // Panel with Group Layout
       JPanel panel = new JPanel();
       GroupLayout groupLayout = new GroupLayout(frame.getContentPane());
       groupLayout.setHorizontalGroup(
@@ -124,6 +135,9 @@ public class PropertiesManager
       );
       panel.setLayout(null);
       
+      /*
+       * UI Elements
+       */
       JLabel lblJdbcUrl = new JLabel("JDBC URL");
       lblJdbcUrl.setBounds(43, 69, 61, 16);
       panel.add(lblJdbcUrl);
@@ -185,6 +199,7 @@ public class PropertiesManager
       lblCrawler.setBounds(43, 209, 96, 28);
       panel.add(lblCrawler);
       
+      // OK button, saves and ends program
       JButton btnOk = new JButton("OK");
       btnOk.addMouseListener(new MouseAdapter() {
          @Override
@@ -204,6 +219,7 @@ public class PropertiesManager
       btnOk.setBounds(358, 399, 84, 29);
       panel.add(btnOk);
       
+      // Apply button, saves but does not close program
       JButton btnApply = new JButton("Apply");
       btnApply.addMouseListener(new MouseAdapter() {
          @Override

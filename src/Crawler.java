@@ -16,14 +16,13 @@ public class Crawler implements Runnable
    public final static String TABLE_IMAGES = "IMAGES";
    public final static String TABLE_WORD = "WORD";
    public final static String TABLE_IMGWORD = "IMGWORD";
-   Connection connection;
-   int NextURLID, NextImageURLID, NextURLIDScanned, urlIndex;
-   public String domain;
-   ArrayList<String> urlList;
-   int MaxURLs;
-   public Properties props;
    public static final int nThread = 1;
-   public boolean reset = true;
+   private Connection connection;
+   private int NextURLID, NextImageURLID, NextURLIDScanned, urlIndex, MaxURLs;
+   private String domain;
+   private ArrayList<String> urlList;
+   private Properties props;
+   private boolean reset = true;
    
    final Object monitor = new Object();
 
@@ -51,6 +50,11 @@ public class Crawler implements Runnable
       catch (Exception e) {}
    }
 
+   /**
+    * Open the properties file to read necessary data such as database 
+    * information and counters
+    * @throws IOException
+    */
    public void readProperties() throws IOException
    {
       props = new Properties();
@@ -59,6 +63,10 @@ public class Crawler implements Runnable
       in.close();
    }
    
+   /**
+    * Save constantly changing counters to properties file to save crawler state
+    * @throws IOException
+    */
    public synchronized void  setProperties() throws IOException
    {
       props.setProperty("crawler.NextURLID",""+NextURLID);
@@ -68,6 +76,9 @@ public class Crawler implements Runnable
       props.store(out, null);
    }
    
+   /**
+    * Get data stored in properties file and save them to the global variables 
+    */
    public synchronized void setVariables()
    {
       NextURLID = Integer.parseInt(props.getProperty("crawler.NextURLID"));
@@ -75,6 +86,12 @@ public class Crawler implements Runnable
       NextImageURLID = Integer.parseInt(props.getProperty("crawler.NextImageURLID"));
    }
 
+   /**
+    * Create connection the the database using DB url, username, and password
+    * stored in the properties file
+    * @throws SQLException
+    * @throws IOException
+    */
    public void openConnection() throws SQLException, IOException
    {
       String drivers = props.getProperty("jdbc.drivers");
@@ -88,6 +105,12 @@ public class Crawler implements Runnable
       connection = DriverManager.getConnection(url, username, password);
    }
 
+   /**
+    * Drop all previously created tables in the DB that the crawler will use
+    * and create new ones. 
+    * @throws SQLException
+    * @throws IOException
+    */
    public void createDB() throws SQLException, IOException
    {
       System.out.println("Connecting to Database...");
@@ -117,6 +140,14 @@ public class Crawler implements Runnable
       stat.close();
    }
 
+   /**
+    * Check if urlFound is already in the given table
+    * @param urlFound
+    * @param table
+    * @return 
+    * @throws SQLException
+    * @throws IOException
+    */
    public synchronized boolean urlInDB(String urlFound, String table) throws SQLException, IOException
    {
       PreparedStatement pstmt = connection
@@ -135,6 +166,14 @@ public class Crawler implements Runnable
       return false;
    }
 
+   /**
+    * Insert a url into the given table with the specified urlid 
+    * @param url
+    * @param urlid
+    * @param table
+    * @throws SQLException
+    * @throws IOException
+    */
    public synchronized void insertURLInDB(String url, int urlid, String table)
          throws SQLException, IOException
    {
@@ -151,6 +190,14 @@ public class Crawler implements Runnable
       pstmt.close();
    }
 
+   /**
+    * Check if a word is found in the specified table 
+    * @param word
+    * @param table
+    * @return
+    * @throws SQLException
+    * @throws IOException
+    */
    public synchronized boolean wordInDB(String word, String table) throws SQLException, IOException
    {  
       PreparedStatement pstmt = connection
@@ -169,6 +216,14 @@ public class Crawler implements Runnable
       return false;
    }
    
+   /**
+    * Insert a new word into the given table with the specified url list
+    * @param word
+    * @param urllist
+    * @param table
+    * @throws SQLException
+    * @throws IOException
+    */
    public synchronized void insertWordInDB(String word, String urllist, String table) throws SQLException, IOException
    {  
       PreparedStatement pstmt = connection
@@ -179,6 +234,14 @@ public class Crawler implements Runnable
       pstmt.close();
    }
    
+   /**
+    * Get the url list of a word from the specified table
+    * @param word
+    * @param table
+    * @return urllist
+    * @throws SQLException
+    * @throws IOException
+    */
    public synchronized String getURLListFromDB(String word, String table) throws SQLException, IOException
    {  
       PreparedStatement pstmt = connection
@@ -192,6 +255,14 @@ public class Crawler implements Runnable
       return list;
    }
    
+   /**
+    * Get the page rank of the given url in the specified table 
+    * @param url
+    * @param table
+    * @return rank
+    * @throws SQLException
+    * @throws IOException
+    */
    public synchronized int getURLRankFromDB(String url, String table) throws SQLException, IOException
    {  
       PreparedStatement pstmt = connection
@@ -205,6 +276,13 @@ public class Crawler implements Runnable
       return rank;
    }
    
+   /**
+    * Check to see if the given url actually exists and is found on the web.
+    * This is an important check so the html parser is not given a url that is
+    * no longer available or found. 
+    * @param link
+    * @return
+    */
    public boolean isHTML(String link)
    {
       URL url;
@@ -217,8 +295,12 @@ public class Crawler implements Runnable
          urlc.setDoInput(true);
          urlc.setDoOutput(false);
          urlc.setUseCaches(true);
+         
+         // Only get the head of the document to save space and time
          urlc.setRequestMethod("HEAD");
          urlc.connect();
+         
+         // Check the content type to make sure the document is HTML
          String mime = urlc.getContentType();
          if (mime.contains("text/html"))
          {
@@ -238,14 +320,20 @@ public class Crawler implements Runnable
       return false;
    }
    
+   /**
+    * Check to see that an image actually exists given a url and has not been 
+    * removed. 
+    * @param url
+    * @return
+    */
    public boolean imageExists(String url){
       
       HttpURLConnection con = null;
       
       try {
         HttpURLConnection.setFollowRedirects(false);
-        // note : you may also need
-        //        HttpURLConnection.setInstanceFollowRedirects(false)
+        
+        // Only get the head of the document to save space and time
         con =
            (HttpURLConnection) new URL(url).openConnection();
         con.setRequestMethod("HEAD");
@@ -261,8 +349,16 @@ public class Crawler implements Runnable
       }
     }
 
+   /**
+    * Get the contents of a specified meta tag. This is used to get the 
+    * document description in the main crawler method. 
+    * @param document
+    * @param attr
+    * @return
+    */
    public String getMetaTag(Document document, String attr)
    {
+      // Try to see if there is content in the name variable 
       Elements elements = document.select("meta[name=" + attr + "]");
       for (Element element : elements)
       {
@@ -270,6 +366,8 @@ public class Crawler implements Runnable
          if (s != null)
             return s;
       }
+      
+      // Try to see if there is content in the property variable 
       elements = document.select("meta[property=" + attr + "]");
       for (Element element : elements)
       {
@@ -280,9 +378,18 @@ public class Crawler implements Runnable
       return null;
    }
 
+   /**
+    * An initializing method for the crawl. Opens a database connection, creates
+    * the DB and sets the necessary variables to their appropriate values. 
+    * @throws SQLException
+    * @throws IOException
+    */
    public void startCrawl() throws SQLException, IOException
    {
-      if(!reset && NextURLIDScanned > 0)
+      /* If the reset flag is not on, no need to recreate the DB. Just open the
+       * connection. If there are no urls scanned, reset database anyways. 
+       */
+      if(!reset && NextURLIDScanned > 0) 
       {
          openConnection();
          return;
@@ -290,10 +397,14 @@ public class Crawler implements Runnable
       
       createDB();
       
+      // Reset variables
       NextURLID = 0;
       NextURLIDScanned = 0;
       NextImageURLID = 0;
       
+      /* For each url in the entered urlList from either the properties file or 
+       * command arguments, add them to the database and increment the counter
+       */
       int urlID;
       for(String url : urlList)
       {
@@ -302,30 +413,50 @@ public class Crawler implements Runnable
          NextURLID++;
       }
       
+      // Save the counters to the properties file
       setProperties();
       
       return;
       
    }
    
+   /**
+    * Get the next url from the specified table to be parsed
+    * @param table
+    * @return url
+    * @throws SQLException
+    * @throws IOException
+    */
    public synchronized String getNextURL(String table) throws SQLException, IOException
    {
+      // Get the variables from the properties file
       setVariables();
+      
+      // Create a query to get the required row
       urlIndex = NextURLIDScanned;
       Statement stat = connection.createStatement();
       ResultSet result = stat
             .executeQuery("SELECT * FROM " + table + " WHERE urlid = " + urlIndex);
       result.next();
+      
+      // Get the url from the url column 
       String url1 = result.getString(2);
       stat.close();
       
       NextURLIDScanned++;
       
+      // Save the counters to the properties file
       setProperties();
       
       return url1;
    }
    
+   /**
+    * Open connection to url1 and create a DOM document from the Jsoup parser.
+    * @param url1
+    * @return document
+    * @throws IOException
+    */
    public synchronized Document parseURL(String url1) throws IOException
    {
       InputStream in = null;
@@ -353,6 +484,13 @@ public class Crawler implements Runnable
       return doc;
    }
 
+   /**
+    * Extract all href links from the given document and add them to the 
+    * database
+    * @param doc
+    * @throws SQLException
+    * @throws IOException
+    */
    public synchronized void extractDocumentURLs(Document doc)
          throws SQLException, IOException
    {
@@ -364,12 +502,14 @@ public class Crawler implements Runnable
 
       for (Element e : links)
       {
+         // Get the absolute url
          String urlFound = e.attr("abs:href");
          urlFound = urlFound.trim();
          boolean found = urlInDB(urlFound, TABLE_URLS);
 
          if (found)
          {
+            // Increment the current url's rank and update its value in the DB
             int rank = getURLRankFromDB(urlFound, TABLE_URLS);
             rank++;
 
@@ -382,21 +522,29 @@ public class Crawler implements Runnable
             pstmt.close();
          }
 
+         /* For a url to be added to the DB it must be http, contain the domain,
+          * and must be an HTML document
+          */
          if (!found && urlFound.contains("http://")
                && urlFound.contains(domain) && !urlFound.contains("#")
                && isHTML(urlFound))
          {
             insertURLInDB(urlFound, NextURLID, TABLE_URLS);
-
             NextURLID++;
+            
+            // Save the counters to the properties file
             setProperties();
-            // setVariables();
-
          }
       }
 
    }
 
+   /**
+    * Extract all images from the given document 
+    * @param doc
+    * @throws SQLException
+    * @throws IOException
+    */
    public synchronized void extractDocumentImages(Document doc)
          throws SQLException, IOException
    {
@@ -408,12 +556,14 @@ public class Crawler implements Runnable
 
       for (Element e : images)
       {
+         // Get the absolute image url
          String imageFound = e.attr("abs:src");
          imageFound = imageFound.trim();
          boolean found = urlInDB(imageFound, TABLE_IMAGES);
 
          if (found)
          {
+            // Increment the current url's rank and update its value in the DB
             int rank = getURLRankFromDB(imageFound, TABLE_IMAGES);
             rank++;
 
@@ -425,16 +575,27 @@ public class Crawler implements Runnable
             pstmt.executeUpdate();
             pstmt.close();
          }
-
+         /* For an image to be added to the DB it must be http and must exist
+          */
          if (!found && imageFound.contains("http://") && imageExists(imageFound))
          {
             insertURLInDB(imageFound, NextImageURLID, TABLE_IMAGES);
             NextImageURLID++;
+            
+            // Save the counters to the properties file
             setProperties();
          }
       }
    }
 
+   /**
+    * The main crawl method. This is where all the magic happens.
+    * Uses Breadth-First Searching algorithm to get urls and images, parse 
+    * documents, and populate the database
+    * @throws SQLException
+    * @throws IOException
+    * @throws InterruptedException
+    */
    public void crawl() throws SQLException, IOException, InterruptedException
    {
       
@@ -456,6 +617,7 @@ public class Crawler implements Runnable
             
       while(NextURLIDScanned < NextURLID)
       {
+         // Get the next url to be parsed
          String url1 = getNextURL(TABLE_URLS);
          doc = parseURL(url1);
          if(doc == null)
@@ -466,7 +628,9 @@ public class Crawler implements Runnable
             // Get title
             String title = doc.title();
             
-            // Get Description
+            /* Get Description by either the description meta tag, first 100 
+             * characters of the body or just the first 100 characters
+             */
             String description = getMetaTag(doc, "description");
             if (description == null && doc.body() != null)
                description = doc.body().text();
@@ -486,6 +650,7 @@ public class Crawler implements Runnable
             pstmt.executeUpdate();
             pstmt.close();
             
+            // Custom checks for cs.purdue.edu 
             if(url1.contains("#") || url1.contains("&oldid=") || url1.contains("calendar/webevent.cgi?"))
                continue;
          }
@@ -496,14 +661,19 @@ public class Crawler implements Runnable
             extractDocumentURLs(doc);
          }
          
+         /* Get the start and end indices to get the total number of images in
+          * the document
+          */
          imgIndexStart = NextImageURLID;
          extractDocumentImages(doc);
          imgIndexEnd = NextImageURLID;
  
          // Get document parsed text (no tags)
          System.out.println("Parsing Document...");
+         // Remove html white spaces
          doc.select(":containsOwn(\u00a0)").remove();
          text = doc.text();
+         // Remove remaining HTML code
          text = Jsoup.clean(text, Whitelist.relaxed());
          
          // Get each word of the document
@@ -522,7 +692,7 @@ public class Crawler implements Runnable
                }
                else
                {
-                  // Else, update the current entry with url1
+                  // Else, update the current entry with the current urlIndex
                   urllist = getURLListFromDB(word, TABLE_WORD);
                   if(!urllist.contains(String.valueOf(urlIndex))) // Check to not add duplicates
                      urllist += "," + urlIndex;
@@ -542,6 +712,10 @@ public class Crawler implements Runnable
                {
                   if(imgIndexStart != imgIndexEnd)
                   {
+                     /*
+                      * Since every document can have multiple images, each word
+                      * must contain all image urlids found in that document
+                      */
                      urllist = imgIndexStart + "";
                      for (int i = imgIndexStart + 1; i < imgIndexEnd; i++)
                         urllist = urllist + "," + i;
@@ -550,7 +724,9 @@ public class Crawler implements Runnable
                }
                else
                {            
-                  // add the words to the imgWord table as well for each image found in the current doc
+                  /* add the words to the imgWord table as well for each image 
+                   * found in the current doc
+                   */
                   urllist = getURLListFromDB(word, TABLE_IMGWORD);
                   for (int i = imgIndexStart + 1; i < imgIndexEnd; i++)
                   {
@@ -578,6 +754,12 @@ public class Crawler implements Runnable
       }
    }
    
+   /**
+    * Create the Crawler object with initial command line arguments
+    * @param args
+    * @return
+    * @throws IOException
+    */
    public static Crawler crawlerWithArguments(String[] args) throws IOException
    {
       // Default values
@@ -590,40 +772,47 @@ public class Crawler implements Runnable
       // Parse arguments
       for(int i = 0; i < args.length; i++)
       {
-         if(args[i].equals("-u"))
+         if(args[i].equals("-u")) // Max URLs
          {
             MaxURLs = Integer.parseInt(args[++i]);
          }
-         else if(args[i].equals("-d"))
+         else if(args[i].equals("-d")) // Domain
          {
             domain = args[++i];
          }
-         else if(args[i].equals("-r"))
+         else if(args[i].equals("-r")) // Reset flag
          {
             reset = true;
          }
          else
          {
-            urlList.add(args[i]);
+            urlList.add(args[i]); // URL List
          }
       }
       
       if(urlList.size() == 0)
          urlList.add(root);
       
-      System.out.println("ARGS: webcrawl -u " + MaxURLs + " -d " + " -r " + reset + " " + domain + " " + urlList);
+      System.out.println("ARGS: webcrawl -u " + MaxURLs + " -d " + domain + " -r " + reset + " " + urlList);
       Crawler crawler = new Crawler(MaxURLs, domain, reset, urlList);
       
       return crawler;
    }
    
+   /**
+    * Create the Crawler object with the properties file if available
+    * @return
+    * @throws IOException
+    */
    public static Crawler crawlerWithProperties() throws IOException
    {
+      // Open the properties file
       Properties props = new Properties();
       FileInputStream in = new FileInputStream("WebContent/WEB-INF/database.properties");
       props.load(in);
       in.close();
       
+      // Get the necessary arguments
       String domain = props.getProperty("crawler.domain");
       String root = props.getProperty("crawler.root");
       int MaxURLs = Integer.parseInt(props.getProperty("crawler.maxurls"));
@@ -635,13 +824,21 @@ public class Crawler implements Runnable
       ArrayList<String> urlList = new ArrayList<String>();
       urlList.add(root);
       
-      System.out.println("PROPS: webcrawl -u " + MaxURLs + " -d " + " -r " + reset + " " + domain + " " + urlList);
+      // Create the crawler
+      System.out.println("PROPS: webcrawl -u " + MaxURLs + " -d " + domain + " -r " + reset + " " + urlList);
       Crawler crawler = new Crawler(MaxURLs, domain, reset, urlList);
       
       return crawler;
       
    }
    
+   /**
+    * Attempt to create a Crawler from either the properties file, command line
+    * arguments, or default values. Which ever one is available.
+    * @param args
+    * @return
+    * @throws IOException
+    */
    public static Crawler createCrawler(String[] args) throws IOException
    {
       // Default Values
@@ -655,11 +852,13 @@ public class Crawler implements Runnable
       Crawler crawler;
       
       // Get the necessary variables from args, props file, or defaults 
-      
-      if(args.length > 0)
+      // Arguments given
+      if(args.length > 0) 
          crawler = crawlerWithArguments(args);
+      // No arguments given but properties file is available
       else if(args.length == 0 || propertiesFile.exists())
          crawler = crawlerWithProperties();
+      // Default values
       else
       {
          urlList.add(root);
@@ -671,9 +870,9 @@ public class Crawler implements Runnable
    }
 
    public static void main(String[] args) throws IOException
-   {     
+   {   
+      // Create the crawler
       Crawler crawler = createCrawler(args);
-      
       
       //Create the threads
       Thread threads[] = new Thread[nThread];

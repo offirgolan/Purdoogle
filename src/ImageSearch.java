@@ -18,46 +18,8 @@ import javax.servlet.http.HttpSession;
 public class ImageSearch extends HttpServlet
 {
    private static final long serialVersionUID = 1L;
-   public Connection connection;
-   public Properties props;
-
-   /**
-    * ResultURL Class which contains necessary information for each url element
-    * to be displayed
-    * 
-    * @author offirgolan
-    * 
-    */
-   class ResultURL implements Comparable<ResultURL>
-   {
-      String url;
-      int urlid, rank;
-
-      public ResultURL(int urlid, String url, int rank)
-      {
-         this.urlid = urlid;
-         this.url = url;
-         this.rank = rank;
-      }
-
-      public void setRank(int rank)
-      {
-         this.rank = rank;
-      }
-
-      @Override
-      public int compareTo(ResultURL arg0)
-      {
-         return arg0.rank - this.rank;
-      }
-
-      @Override
-      public String toString()
-      {
-         return this.rank + "";
-      }
-
-   }
+   private Connection connection;
+   private Properties props;
 
    protected void doPost(HttpServletRequest request,
          HttpServletResponse response) throws ServletException, IOException
@@ -75,26 +37,32 @@ public class ImageSearch extends HttpServlet
       readProperties();
       try
       {
+         // Get the search query and page number from the request
          search = request.getParameter("search_field");
          pageNum = Integer.parseInt(request.getParameter("page"));
 
          // Open database connection
          openConnection();
-
+         
+         // Split the search query by words
          String[] words = search.toLowerCase().split("\\s+");
          List<List<Integer>> urlIDs = new ArrayList<List<Integer>>();
          List<ResultURL> result = new ArrayList<ResultURL>();
+         
+         // Create a crawler with the opened connection
          Crawler crawler = new Crawler(connection);
 
          // Get the urlList of each word
          for (String word : words)
          {
+            // Check to see if the search query word is in the DB
             if (crawler.wordInDB(word, Crawler.TABLE_IMGWORD))
             {
+               // Get the urlList corresponding to the word
                String list = crawler.getURLListFromDB(word, Crawler.TABLE_IMGWORD);
                List<Integer> temp = new ArrayList<Integer>();
 
-               // Add each individual urlID to the list
+               // Create a list of integers from the list
                for (String idStr : list.split(","))
                {
                   temp.add(Integer.parseInt(idStr));
@@ -139,20 +107,23 @@ public class ImageSearch extends HttpServlet
             for (ResultURL obj : result)
             {
                ArrayList<String> temp = new ArrayList<String>();
-               temp.add(obj.url);
-               temp.add(obj.rank + "");
-               temp.add(obj.urlid + "");
+               temp.add(obj.getUrl());
+               temp.add(obj.getRank() + "");
+               temp.add(obj.getUrlid() + "");
 
                resultList.add(temp);
             }
          }
 
-         // Add resultList to request
+         /* 
+          * Add resultList, original search query, and the update page number 
+          * to the request
+          */
          request.setAttribute("query", search);
          request.setAttribute("resultList", resultList);
          request.setAttribute("pageNum", pageNum);
 
-         // Forward to viewSearch
+         // Forward to image results page
          String nextJSP = "/imageResults.jsp";
          RequestDispatcher dispatcher = getServletContext()
                .getRequestDispatcher(nextJSP);
@@ -162,12 +133,15 @@ public class ImageSearch extends HttpServlet
 
       catch (Exception e)
       {
-         // TODO Auto-generated catch block
          e.printStackTrace();
       }
 
    }
 
+   /**
+    * Open the properties file to retrieve information from it
+    * @throws IOException
+    */
    public void readProperties() throws IOException
    {
       props = new Properties();
@@ -176,6 +150,12 @@ public class ImageSearch extends HttpServlet
 
    }
 
+   /**
+    * Create a connection to the DB from the properties file
+    * @throws SQLException
+    * @throws IOException
+    * @throws ClassNotFoundException
+    */
    public void openConnection() throws SQLException, IOException,
          ClassNotFoundException
    {
@@ -192,20 +172,4 @@ public class ImageSearch extends HttpServlet
       Class.forName(driver);
       connection = DriverManager.getConnection(url, username, password);
    }
-
-   public Set<Integer> findIntersection(List<Integer> list)
-   {
-      final Set<Integer> setToReturn = new HashSet<Integer>();
-      final Set<Integer> set1 = new HashSet<Integer>();
-
-      for (Integer yourInt : list)
-      {
-         if (!set1.add(yourInt))
-         {
-            setToReturn.add(yourInt);
-         }
-      }
-      return setToReturn;
-   }
-
 }

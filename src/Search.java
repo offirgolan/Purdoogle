@@ -18,54 +18,8 @@ import javax.servlet.http.HttpSession;
 public class Search extends HttpServlet
 {
    private static final long serialVersionUID = 1L;
-   public Connection connection;
-   public Properties props;
-
-   /**
-    * ResultURL Class which contains necessary information for each url element
-    * to be displayed
-    * 
-    * @author offirgolan
-    * 
-    */
-   class ResultURL implements Comparable<ResultURL>
-   {
-      String url, title, description;
-      int urlid, rank;
-
-      public ResultURL(int urlid, String url, int rank, String title,
-            String desc)
-      {
-         this.urlid = urlid;
-         this.url = url;
-         this.rank = rank;
-         this.title = title;
-         this.description = desc;
-      }
-
-      public void setRank(int rank)
-      {
-         this.rank = rank;
-      }
-
-      public void setTitle(String title)
-      {
-         this.title = title;
-      }
-
-      @Override
-      public int compareTo(ResultURL arg0)
-      {
-         return arg0.rank - this.rank;
-      }
-
-      @Override
-      public String toString()
-      {
-         return this.rank + "";
-      }
-
-   }
+   private Connection connection;
+   private Properties props;
 
    protected void doPost(HttpServletRequest request,
          HttpServletResponse response) throws ServletException, IOException
@@ -83,26 +37,32 @@ public class Search extends HttpServlet
       readProperties();
       try
       {
+         // Get the search query and page number from the request
          search = request.getParameter("search_field");
          pageNum = Integer.parseInt(request.getParameter("page"));
 
          // Open database connection
          openConnection();
 
+         // Split the search query by words
          String[] words = search.toLowerCase().split("\\s+");
          List<List<Integer>> urlIDs = new ArrayList<List<Integer>>();
          List<ResultURL> result = new ArrayList<ResultURL>();
+         
+         // Create a crawler with the opened connection
          Crawler crawler = new Crawler(connection);
 
          // Get the urlList of each word
          for (String word : words)
          {
+            // Check to see if the search query word is in the DB
             if (crawler.wordInDB(word, Crawler.TABLE_WORD))
             {
+               // Get the urlList corresponding to the word
                String list = crawler.getURLListFromDB(word, Crawler.TABLE_WORD);
                List<Integer> temp = new ArrayList<Integer>();
 
-               // Add each individual urlID to the list
+               // Create a list of integers from the list
                for (String idStr : list.split(","))
                {
                   temp.add(Integer.parseInt(idStr));
@@ -141,25 +101,33 @@ public class Search extends HttpServlet
                pstmt.close();
             }
 
-            // Update rank if the word is found in the URL's title
+            /* 
+             * Update rank if the word is found in the URL's title. For every
+             * word found in the title, increment the rank by one
+             * 
+             */
             for (ResultURL obj : result)
             {
                int count = 1;
                for (String word : words)
                {
-                  String title = obj.title.toLowerCase();
+                  String title = obj.getTitle().toLowerCase();
 
                   if (title.contains(word.toLowerCase()))
                   {
                      // Bold the word in the title
                      int start = title.indexOf(word);
                      int end = start + word.length();
-                     String titleBold = obj.title.substring(0, start) + "<b>"
-                           + obj.title.substring(start, end) + "</b>"
-                           + obj.title.substring(end, title.length());
+                     String titleBold = obj.getTitle().substring(0, start) + "<b>"
+                           + obj.getTitle().substring(start, end) + "</b>"
+                           + obj.getTitle().substring(end, title.length());
 
-                     // Update page rank
-                     obj.setRank(obj.rank + maxRank + count);
+                     /* 
+                      * Update page rank. Bring element to the top of the list
+                      * by adding the maxRank then adding the found word counter
+                      * 
+                      */
+                     obj.setRank(obj.getRank() + maxRank + count);
 
                      // Update to new title
                      obj.setTitle(titleBold);
@@ -171,26 +139,29 @@ public class Search extends HttpServlet
             // Sort the result collection by rank from high to low
             Collections.sort(result);
 
-            // Convert object to String representations
+            // Convert object to String representations to be used in the jsp
             for (ResultURL obj : result)
             {
                ArrayList<String> temp = new ArrayList<String>();
-               temp.add(obj.url);
-               temp.add(obj.title);
-               temp.add(obj.description);
-               temp.add(obj.rank + "");
-               temp.add(obj.urlid + "");
+               temp.add(obj.getUrl());
+               temp.add(obj.getTitle());
+               temp.add(obj.getDescription());
+               temp.add(obj.getRank() + "");
+               temp.add(obj.getUrlid() + "");
 
                resultList.add(temp);
             }
          }
 
-         // Add resultList to request
+         /* 
+          * Add resultList, original search query, and the update page number 
+          * to the request
+          */
          request.setAttribute("query", search);
          request.setAttribute("resultList", resultList);
          request.setAttribute("pageNum", pageNum);
 
-         // Forward to viewSearch
+         // Forward to results page
          String nextJSP = "/results.jsp";
          RequestDispatcher dispatcher = getServletContext()
                .getRequestDispatcher(nextJSP);
@@ -206,6 +177,10 @@ public class Search extends HttpServlet
 
    }
 
+   /**
+    * Open the properties file to retrieve information from it
+    * @throws IOException
+    */
    public void readProperties() throws IOException
    {
       props = new Properties();
@@ -214,6 +189,12 @@ public class Search extends HttpServlet
 
    }
 
+   /**
+    * Create a connection to the DB from the properties file
+    * @throws SQLException
+    * @throws IOException
+    * @throws ClassNotFoundException
+    */
    public void openConnection() throws SQLException, IOException,
          ClassNotFoundException
    {
@@ -229,21 +210,6 @@ public class Search extends HttpServlet
 
       Class.forName(driver);
       connection = DriverManager.getConnection(url, username, password);
-   }
-
-   public Set<Integer> findIntersection(List<Integer> list)
-   {
-      final Set<Integer> setToReturn = new HashSet<Integer>();
-      final Set<Integer> set1 = new HashSet<Integer>();
-
-      for (Integer yourInt : list)
-      {
-         if (!set1.add(yourInt))
-         {
-            setToReturn.add(yourInt);
-         }
-      }
-      return setToReturn;
    }
 
 }
