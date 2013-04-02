@@ -38,12 +38,12 @@ This notice MUST stay intact for legal use.
                 var pos = $(this).offset();
                 var width = $(this).width();
                 //var leftpos = pos.left + width + o.positionOffset;
-                var leftpos = 750;
+                var leftpos = $(window).width() * .59;
                 if(o.position == 'left')
                     leftpos = pos.left - o.viewWidth - o.positionOffset;
                 var toppos;
                 if($(window).scrollTop() < ($('#Stub').height() + $('#TopBar').height() + $('#BlackBar').height()))
-                	toppos = $(window).scrollTop() + $('#BlackBar').height() + $('#TopBar').height() + $('#Stub').height();
+                	toppos = $('#BlackBar').offset().top + $('#TopBar').offset().top + $('#Stub').offset().top + 10;
                 else
                 	toppos = $(window).scrollTop();
                 //hover on 

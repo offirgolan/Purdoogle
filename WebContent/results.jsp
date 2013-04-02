@@ -247,7 +247,6 @@
       <%
          }
       %>
-      
         </div>
 		<div class=footer>
 			<p>Offir Golan &copy; Purdoogle 2013 All Rights Reserved.</p>

@@ -78,7 +78,7 @@ $(document).ready(function() {
     </div>
 
 
-   <div class=results>
+   <div class="results image-results">
       <%
       // If there are no results found
          if (result != null)
@@ -120,7 +120,7 @@ $(document).ready(function() {
 
 <footer>
 <div id="footer">
-      <div class=footer>
+      <div class="footer image-footer">
          <p>Offir Golan &copy; Purdoogle 2013 All Rights Reserved.</p>
       </div>
 </div>

@@ -96,7 +96,6 @@ img {
 
 /*-------------------------------------*/
 .topbar {
-	background-attachment: scroll, scroll;
 	overflow-y: visible;
 	background: #f1f1f1;
 	background: -webkit-gradient(radial, 100 36, 0, 100 -40, 120, from(#fafafa),
@@ -106,14 +105,17 @@ img {
 	height: 71px;
 	position: absolute;
 	top: 29px;
-	left: -5px;
-	width: 105%;
+	left: 0px;
+	min-width: 750px;
+	width: 100%;
 	z-index: 985;
-	min-width: 1280px;
 }
 
 .footer {
-	background-attachment: scroll, scroll;
+	background-clip: border-box;
+   border-top-color: #EBEBEB;
+   border-top-style: solid;
+   border-top-width: 1px;
 	overflow-y: visible;
 	background: #f1f1f1;
 	background: -webkit-gradient(radial, 100 36, 0, 100 -40, 120, from(#fafafa),
@@ -122,12 +124,19 @@ img {
 	border-color: #e5e5e5;
 	height: 40px;
 	position: absolute;
-	left: -5px;
-	width: 105%;
+	min-width: 750px;
+	width: 100%;
 	z-index: 985;
-	min-width: 1280px;
 	bottom: 0;
+	left: 0px;
+   right: 0px;
 	border-color: #e5e5e5;
+	margin-bottom: -15px;
+}
+
+.image-footer {
+	background: white;
+	
 }
 
 .footer p {
@@ -149,10 +158,13 @@ html,body {
 	padding-bottom: 120px;
 } /* must be same height as the footer */
 #footer {
-	position: relative;
+	position: absolute;
 	margin-top: -120px; /* negative value of footer height */
 	height: 120px;
 	clear: both;
+	right: 0px;
+	left: 0px;
+	min-width: 100%;
 }
 
 /*Opera Fix*/
@@ -166,8 +178,13 @@ body:before { /* thanks to Maleika (Kohoutec)*/
 
 /*-------------------------------------*/
 .results {
-	margin-top: 120px;
+	margin-top: 155px;
 	margin-left: 30px;
+	max-width: 50%;
+}
+
+.image-results {
+   max-width: 100%;
 }
 
 /*-------------------------------------*/
@@ -330,7 +347,7 @@ body:before { /* thanks to Maleika (Kohoutec)*/
 
 .arrow-right {
 	font-size: 20px;
-	padding-left: 680px;
+	padding-left: 105%;
 	margin-bottom: -35px;
 	margin-top: 0px;
 }
@@ -361,7 +378,6 @@ body:before { /* thanks to Maleika (Kohoutec)*/
 }
 
 .stub {
-	background-attachment: scroll;
 	background-clip: border-box;
 	background-color: white;
 	background-image: none;
@@ -376,7 +392,9 @@ body:before { /* thanks to Maleika (Kohoutec)*/
 	height: 40px;
 	line-height: 36px;
 	margin-bottom: 0px;
-	margin-left: -8px;
+	margin-left: 0px;
+	left: 0px;
+	right: 0px;
 	margin-right: 0px;
 	margin-top: 35px;
 	padding-bottom: 0px;
@@ -384,13 +402,13 @@ body:before { /* thanks to Maleika (Kohoutec)*/
 	padding-right: 0px;
 	padding-top: 0px;
 	position: absolute;
+	min-width: 750px;
 	width: 100%;
 	z-index: 102;
 	top: 65px;
 }
 
 .stub-focus {
-	background-attachment: scroll;
 	background-clip: border-box;
 	background-color: transparent;
 	background-image: none;
@@ -425,7 +443,6 @@ body:before { /* thanks to Maleika (Kohoutec)*/
 }
 
 .stub-regular {
-	background-attachment: scroll;
    background-clip: border-box;
    background-color: transparent;
    background-image: none;
@@ -461,12 +478,11 @@ body:before { /* thanks to Maleika (Kohoutec)*/
 }
 
 .top-bar-black {
-	background-attachment: scroll;
+	overflow-y: visible;
 	background-clip: border-box;
 	background-color: #2D2D2D;
 	background-image: none;
 	background-origin: padding-box;
-	background-position: 0px -138px;
 	background-repeat: repeat-x;
 	border-bottom-color: black;
 	border-bottom-style: solid;
@@ -482,18 +498,17 @@ body:before { /* thanks to Maleika (Kohoutec)*/
 	font-variant: normal;
 	font-weight: normal;
 	height: 29px;
-	margin-left: -8px;
 	line-height: 27px;
-	min-width: 980px;
+	min-width: 750px;
+	width: 100%;
 	opacity: 1;
-	position: relative;
-	top: -8px;
-	width: 1280px;
+	position: absolute;
+	top: 0px;
+	left: 0px;
 	z-index: 990;
 }
 
 .top-bar-black a {
-	background-position: 0 -102px;
 	background-repeat: repeat-x;
 	outline: none;
 	text-decoration: none !important;
