@@ -162,7 +162,7 @@ These tables will store the list of words and the URLs / images that contain the
 contain that word. Since the length of this string is variable, you can
 use a VARCHAR type. </li>
 </ul>
-<br><br>
+<br>
 A completed database with all the mySQL tables can be found in the database directory. It countains 7027 urls and 5334 urls that have been fully parsed. Feel free to use these tables for your testing or development. 
 
 The Crawler
