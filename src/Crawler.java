@@ -16,7 +16,8 @@ public class Crawler implements Runnable
    public final static String TABLE_IMAGES = "IMAGES";
    public final static String TABLE_WORD = "WORD";
    public final static String TABLE_IMGWORD = "IMGWORD";
-   public static final int nThread = 1;
+   public final static int nThread = 1;
+   
    private Connection connection;
    private int NextURLID, NextImageURLID, NextURLIDScanned, urlIndex, MaxURLs;
    private String domain;
@@ -24,7 +25,7 @@ public class Crawler implements Runnable
    private Properties props;
    private boolean reset = true;
    
-   final Object monitor = new Object();
+   private final Object monitor = new Object();
 
    Crawler(int MaxURLs, String domain, boolean reset, ArrayList<String> urlList) throws IOException
    {
@@ -525,7 +526,7 @@ public class Crawler implements Runnable
          /* For a url to be added to the DB it must be http, contain the domain,
           * and must be an HTML document
           */
-         if (!found && urlFound.contains("http://")
+         if (!found && NextURLIDScanned < nThread && urlFound.contains("http://")
                && urlFound.contains(domain) && !urlFound.contains("#")
                && isHTML(urlFound))
          {
@@ -750,7 +751,6 @@ public class Crawler implements Runnable
          System.out.println("-------------------------------------------");
          
          setProperties();
-         //setVariables();
       }
    }
    
@@ -877,9 +877,7 @@ public class Crawler implements Runnable
       //Create the threads
       Thread threads[] = new Thread[nThread];
       for(int i = 0; i < threads.length; i++)
-      {
-         threads[i] = new Thread(crawler, "" + i);
-      }      
+         threads[i] = new Thread(crawler, "" + i); 
       
       // Crawl that sucker
       try
@@ -889,9 +887,7 @@ public class Crawler implements Runnable
          System.out.println("Crawling...");
          System.out.println("-------------------------------------------");
          for(int i = 0; i < threads.length; i++)
-         {
             threads[i].start();
-         }
          
          for(int i = 0; i < threads.length; i++)
             threads[i].join();                          
