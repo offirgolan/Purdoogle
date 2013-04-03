@@ -48,9 +48,9 @@ This notice MUST stay intact for legal use.
                 	toppos = $(window).scrollTop();
                 //hover on 
                 $('body').append('<div id="livepreview_dialog" style="display:none; background:#fff; padding:0px; border-left:1px solid #C0C0C0; left: ' 
-                		+ leftpos + 'px; top:' + toppos + 'px; width: ' + o.viewWidth + 'px; height: ' 
+                		+ leftpos + 'px; top:' + toppos + 'px; width: ' + $(window).width()*.5 + 'px; height: ' 
                 		+ o.viewHeight + 'px"><iframe scrolling="no" frameBorder="0" id="livepreview_iframe" src="' 
-                		+ href + '" style="border: 0; height:' + o.targetHeight + 'px; width:' + o.targetWidth 
+                		+ href + '" style="border: 0; height:' + o.targetHeight + 'px; width:' + $(window).width()*.5 
                 		+ 'px;-moz-transform: scale('+ s + ');-moz-transform-origin: 0 0;-o-transform: scale('+ s + ');-o-transform-origin: 0 0;-webkit-transform: scale('+ s + ');-webkit-transform-origin: 0 0;"></iframe></div>');
                 $('#livepreview_dialog').fadeIn(500);
                 //animate({width:'toggle'},o.viewWidth);

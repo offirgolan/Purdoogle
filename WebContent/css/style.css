@@ -136,36 +136,34 @@ img {
 }
 
 .top-bar-black {
-	background-attachment: scroll;
-	background-clip: border-box;
-	background-color: #2D2D2D;
-	background-image: none;
-	background-origin: padding-box;
-	background-position: 0px -138px;
-	background-repeat: repeat-x;
-	border-bottom-color: black;
-	border-bottom-style: solid;
-	border-bottom-width: 1px;
-	border-left-color: black;
-	border-right-color: black;
-	border-top-color: black;
-	color: #222;
-	display: block;
-	font-family: Arial, sans-serif;
-	font-size: 24px;
-	font-style: normal;
-	font-variant: normal;
-	font-weight: normal;
-	height: 29px;
-	margin-left: -8px;
-	line-height: 27px;
-	min-width: 980px;
-	opacity: 1;
-	position: relative;
-	top: -8px;
-	width: 1280px;
-	z-index: 990;
-	font-weight: bold;
+   overflow-y: visible;
+   background-clip: border-box;
+   background-color: #2D2D2D;
+   background-image: none;
+   background-origin: padding-box;
+   background-repeat: repeat-x;
+   border-bottom-color: black;
+   border-bottom-style: solid;
+   border-bottom-width: 1px;
+   border-left-color: black;
+   border-right-color: black;
+   border-top-color: black;
+   color: #222;
+   display: block;
+   font-family: Arial, sans-serif;
+   font-size: 24px;
+   font-style: normal;
+   font-variant: normal;
+   font-weight: normal;
+   height: 29px;
+   line-height: 27px;
+   min-width: 750px;
+   width: 100%;
+   opacity: 1;
+   position: absolute;
+   top: 0px;
+   left: 0px;
+   z-index: 990;
 }
 
 .top-bar-black a {
@@ -180,4 +178,15 @@ img {
 
 .top-bar-black a:active, .top-bar-black a:hover {
    color: #fff;
+}
+
+.home {
+	width: 750px;
+	height: 450px;
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	margin: auto;
 }
